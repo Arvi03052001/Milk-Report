@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .line {
+            width: 80%;
+            height: 2px;
+            background-color: #007bff;
+            margin: 20px auto;
+            border-radius: 5px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <h1>Milk Record</h1>
+    <div class="line"></div>
+    <div class="button-container">
+        <button id="amButton">AM</button>
+        <button id="pmButton">PM</button>
+        <button id="priceButton">PRICE</button>
+        <button id="usersButton">USERS</button>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
+            authDomain: "milk-2dd07.firebaseapp.com",
+            projectId: "milk-2dd07",
+            storageBucket: "milk-2dd07.appspot.com",
+            messagingSenderId: "1013506317972",
+            appId: "1:1013506317972:web:d0143c779469ac96be1e81",
+            measurementId: "G-TXB3TX5TP1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        document.getElementById('amButton').addEventListener('click', () => {
+            window.location.href = 'am_milk.html';
+        });
+
+        document.getElementById('pmButton').addEventListener('click', () => {
+            window.location.href = 'pm_milk.html';
+        });
+
+        document.getElementById('priceButton').addEventListener('click', () => {
+            window.location.href = 'price.html';
+        });
+
+        document.getElementById('usersButton').addEventListener('click', () => {
+            window.location.href = 'users.html';
+        });
+    </script>
+</body>
+</html>

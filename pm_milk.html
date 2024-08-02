@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM Milk Record</title>
+    <title>People Show</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -20,27 +20,28 @@
             margin: 20px 0;
         }
 
-        input {
-            padding: 15px;
-            font-size: 1.2em;
-            border: 2px solid #007bff;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 400px;
-            margin: 20px 0;
-            outline: none;
-            transition: border-color 0.3s;
+        table {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
         }
 
-        input:focus {
-            border-color: #0056b3;
+        td, th {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
         }
 
         .button-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
             margin-top: 20px;
         }
 
@@ -64,84 +65,33 @@
         button:active {
             transform: scale(0.95);
         }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
-            border-radius: 5px;
-            text-align: left;
-        }
-
-        .close, .modal-button {
-            color: white;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: #000;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .modal-button {
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            margin: 10px;
-        }
-
-        .modal-button:hover {
-            background-color: #0056b3;
-        }
     </style>
 </head>
 <body>
-    <h1>PM Milk Record</h1>
-    <input type="number" id="serialNumberInput" placeholder="Enter Serial Number" min="1">
-    <input type="number" id="quantityInput" placeholder="Enter Milk Quantity" min="1">
-    <div class="button-container">
-        <button id="okButton">OK</button>
-        <button id="backButton">Back</button>
-    </div>
+    <h1>Users List</h1>
+    
+    <!-- Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody id="usersTableBody">
+            <!-- User data will be inserted here -->
+        </tbody>
+    </table>
 
-    <!-- Modal -->
-    <div id="confirmationModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <p id="confirmationText"></p>
-            <div class="button-container">
-                <button id="confirmButton" class="modal-button">Confirm</button>
-                <button id="cancelButton" class="modal-button">Cancel</button>
-            </div>
-        </div>
+    <!-- Back Button -->
+    <div class="button-container">
+        <button id="backButton">Back</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
-
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+    
         const firebaseConfig = {
             apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
             authDomain: "milk-2dd07.firebaseapp.com",
@@ -151,65 +101,51 @@
             appId: "1:1013506317972:web:d0143c779469ac96be1e81",
             measurementId: "G-TXB3TX5TP1"
         };
-
+    
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Get modal elements
-        const modal = document.getElementById('confirmationModal');
-        const closeModal = document.getElementById('closeModal');
-        const confirmButton = document.getElementById('confirmButton');
-        const cancelButton = document.getElementById('cancelButton');
-        const confirmationText = document.getElementById('confirmationText');
-
-        // OK button event listener
-        document.getElementById('okButton').addEventListener('click', () => {
-            const serialNumber = document.getElementById('serialNumberInput').value;
-            const quantity = document.getElementById('quantityInput').value;
-
-            if (serialNumber && quantity) {
-                confirmationText.textContent = `Are you sure you want to record the milk with Serial Number: ${serialNumber} and Quantity: ${quantity}?`;
-                modal.style.display = "block";
-            } else {
-                alert('Please enter both serial number and milk quantity.');
-            }
-        });
-
-        // Confirm button in the modal
-        confirmButton.addEventListener('click', async () => {
-            const serialNumber = document.getElementById('serialNumberInput').value;
-            const quantity = document.getElementById('quantityInput').value;
-
+        async function fetchUsers() {
             try {
-                const milkRef = ref(database, 'pm_milk/' + serialNumber);
-                await set(milkRef, { serialNumber: serialNumber, quantity: quantity });
-                alert('Milk record added successfully!');
-                modal.style.display = "none";
-                window.location.href = 'main.html'; // Redirect to main.html after adding the record
-            } catch (error) {
-                console.error("Error adding milk record: ", error);
-            }
-        });
+                const usersRef = ref(database, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const usersTableBody = document.getElementById('usersTableBody');
 
-        // Cancel button or close icon in the modal
-        cancelButton.addEventListener('click', () => {
-            modal.style.display = "none";
-        });
-        closeModal.addEventListener('click', () => {
-            modal.style.display = "none";
-        });
+                    // Clear existing rows
+                    usersTableBody.innerHTML = '';
+
+                    // Populate table with user data
+                    for (const [serial, user] of Object.entries(users)) {
+                        const row = document.createElement('tr');
+                        const serialCell = document.createElement('td');
+                        const nameCell = document.createElement('td');
+
+                        serialCell.textContent = serial;
+                        nameCell.textContent = user.name || 'No Name';
+
+                        row.appendChild(serialCell);
+                        row.appendChild(nameCell);
+                        usersTableBody.appendChild(row);
+                    }
+                } else {
+                    document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="2">No users found</td></tr>';
+                }
+            } catch (error) {
+                console.error("Error fetching users: ", error);
+                document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="2">Error</td></tr>';
+            }
+        }
+
+        // Fetch users on page load
+        fetchUsers();
 
         // Back button event listener
         document.getElementById('backButton').addEventListener('click', () => {
-            window.location.href = 'main.html';
+            window.history.back();
         });
-
-        // Close modal if clicking outside of it
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        };
     </script>
 </body>
 </html>

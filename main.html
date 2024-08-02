@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -55,17 +55,74 @@
         button:active {
             transform: scale(0.95);
         }
+
+        /* Popup Styles */
+        .popup {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .popup-content h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #333;
+        }
+
+        .popup-content button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .popup-content button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <h1>Milk Record</h1>
+    <h1 id="pageTitle">Milk Record</h1>
     <div class="line"></div>
     <div class="button-container">
-        <button id="amButton">AM</button>
-        <button id="pmButton">PM</button>
-        <button id="priceButton">PRICE</button>
-        <button id="usersButton">USERS</button>
+        <button id="amButton" data-translate="amButton">AM</button>
+        <button id="pmButton" data-translate="pmButton">PM</button>
+        <button id="priceButton" data-translate="priceButton">PRICE</button>
+        <button id="usersButton" data-translate="usersButton">USERS</button>
+        <button id="languageButton" data-translate="languageButton">LANGUAGE</button>
     </div>
+
+    <!-- Language Popup -->
+    <div id="languagePopup" class="popup">
+        <div class="popup-content">
+            <h2 data-translate="popupTitle">Select Language</h2>
+            <button id="englishButton" data-translate="englishButton">English</button>
+            <button id="kannadaButton" data-translate="kannadaButton">Kannada</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
@@ -97,6 +154,51 @@
 
         document.getElementById('usersButton').addEventListener('click', () => {
             window.location.href = 'users.html';
+        });
+
+        document.getElementById('languageButton').addEventListener('click', () => {
+            document.getElementById('languagePopup').style.display = 'flex';
+        });
+
+        document.getElementById('englishButton').addEventListener('click', () => {
+            setLanguage('en');
+        });
+
+        document.getElementById('kannadaButton').addEventListener('click', () => {
+            setLanguage('kn');
+        });
+
+        function setLanguage(language) {
+            // Store selected language in local storage
+            localStorage.setItem('language', language);
+
+            // Update page content based on selected language
+            loadTranslations(language).then(translations => {
+                document.getElementById('pageTitle').textContent = translations.title;
+                document.getElementById('popupTitle').textContent = translations.popupTitle;
+                document.getElementById('amButton').textContent = translations.amButton;
+                document.getElementById('pmButton').textContent = translations.pmButton;
+                document.getElementById('priceButton').textContent = translations.priceButton;
+                document.getElementById('usersButton').textContent = translations.usersButton;
+                document.getElementById('languageButton').textContent = translations.languageButton;
+                document.getElementById('englishButton').textContent = translations.englishButton;
+                document.getElementById('kannadaButton').textContent = translations.kannadaButton;
+            });
+
+            // Hide the popup
+            document.getElementById('languagePopup').style.display = 'none';
+        }
+
+        // Function to load translations
+        async function loadTranslations(language) {
+            const response = await fetch(`translations/${language}.json`);
+            return response.json();
+        }
+
+        // Apply saved language on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLanguage = localStorage.getItem('language') || 'en';
+            setLanguage(savedLanguage);
         });
     </script>
 </body>

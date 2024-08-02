@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove User</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 400px;
+            margin: 20px 0;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #0056b3;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <h1>Remove User</h1>
+    <input type="number" id="serialNumberInput" placeholder="Enter Serial Number" min="1">
+    <div class="button-container">
+        <button id="okButton">OK</button>
+        <button id="backButton">Back</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getFirestore, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
+        import { getDatabase, ref, remove } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
+            authDomain: "milk-2dd07.firebaseapp.com",
+            projectId: "milk-2dd07",
+            storageBucket: "milk-2dd07.appspot.com",
+            messagingSenderId: "1013506317972",
+            appId: "1:1013506317972:web:d0143c779469ac96be1e81",
+            measurementId: "G-TXB3TX5TP1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const database = getDatabase(app);
+
+        // OK button event listener
+        document.getElementById('okButton').addEventListener('click', async () => {
+            const serialNumber = document.getElementById('serialNumberInput').value;
+
+            if (serialNumber) {
+                if (confirm(`Are you sure you want to remove the user with Serial Number: ${serialNumber}?`)) {
+                    try {
+                        // Remove from Firestore
+                        const userDocRef = doc(firestore, 'users', serialNumber);
+                        await deleteDoc(userDocRef);
+
+                        // Remove from Realtime Database
+                        const userRef = ref(database, 'users/' + serialNumber);
+                        await remove(userRef);
+
+                        alert('User removed successfully!');
+                        window.location.href = 'users.html'; // Redirect to users.html after removal
+                    } catch (error) {
+                        console.error("Error removing user: ", error);
+                    }
+                }
+            } else {
+                alert('Please enter a serial number.');
+            }
+        });
+
+        // Back button event listener
+        document.getElementById('backButton').addEventListener('click', () => {
+            window.location.href = 'users.html';
+        });
+    </script>
+</body>
+</html>

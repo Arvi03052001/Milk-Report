@@ -59,14 +59,38 @@
         <button id="userRemoveButton">USER REMOVE</button>
         <button id="backButton">BACK</button>
     </div>
-    <script type="module" src="script.js"></script>
-    <script>
-        // Navigate to user_list.html when USERS LIST button is clicked
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
+            authDomain: "milk-2dd07.firebaseapp.com",
+            projectId: "milk-2dd07",
+            storageBucket: "milk-2dd07.appspot.com",
+            messagingSenderId: "1013506317972",
+            appId: "1:1013506317972:web:d0143c779469ac96be1e81",
+            measurementId: "G-TXB3TX5TP1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
         document.getElementById('usersListButton').addEventListener('click', () => {
             window.location.href = 'user_list.html';
         });
 
-        // Other buttons event listeners can go here...
+        document.getElementById('userAddButton').addEventListener('click', () => {
+            window.location.href = 'user_add.html';
+        });
+
+        document.getElementById('userRemoveButton').addEventListener('click', () => {
+            window.location.href = 'user_remove.html';
+        });
+
+        document.getElementById('backButton').addEventListener('click', () => {
+            window.location.href = 'main.html';
+        });
     </script>
 </body>
 </html>

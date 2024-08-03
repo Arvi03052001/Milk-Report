@@ -111,6 +111,7 @@
         <button id="pmButton" data-translate="pmButton">PM</button>
         <button id="priceButton" data-translate="priceButton">PRICE</button>
         <button id="usersButton" data-translate="usersButton">USERS</button>
+        <button id="paymentButton" data-translate="paymentButton">PAYMENT</button> <!-- Added Payment Button -->
         <button id="languageButton" data-translate="languageButton">LANGUAGE</button>
     </div>
 
@@ -156,6 +157,10 @@
             window.location.href = 'users.html';
         });
 
+        document.getElementById('paymentButton').addEventListener('click', () => {
+            window.location.href = 'payment.html'; // Redirect to payment.html
+        });
+
         document.getElementById('languageButton').addEventListener('click', () => {
             document.getElementById('languagePopup').style.display = 'flex';
         });
@@ -180,6 +185,7 @@
                 document.getElementById('pmButton').textContent = translations.pmButton;
                 document.getElementById('priceButton').textContent = translations.priceButton;
                 document.getElementById('usersButton').textContent = translations.usersButton;
+                document.getElementById('paymentButton').textContent = translations.paymentButton; // Update Payment Button text
                 document.getElementById('languageButton').textContent = translations.languageButton;
                 document.getElementById('englishButton').textContent = translations.englishButton;
                 document.getElementById('kannadaButton').textContent = translations.kannadaButton;

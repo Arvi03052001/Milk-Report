@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 400px;
+            margin: 20px 0;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #0056b3;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .close, .modal-button {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-button {
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+
+        .modal-button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Login</h1>
+    
+    <input type="text" id="phoneNumberInput" placeholder="Enter Phone Number">
+    <input type="text" id="codeInput" placeholder="Enter Code">
+    <button id="loginButton">Login</button>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeSuccessModal">&times;</span>
+            <p>Login successful! Redirecting...</p>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeErrorModal">&times;</span>
+            <p>Invalid credentials. Please re-enter your phone number and code.</p>
+            <button id="reEnterButton" class="modal-button">Re-Enter</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
+            authDomain: "milk-2dd07.firebaseapp.com",
+            projectId: "milk-2dd07",
+            storageBucket: "milk-2dd07.appspot.com",
+            messagingSenderId: "1013506317972",
+            appId: "1:1013506317972:web:d0143c779469ac96be1e81",
+            measurementId: "G-TXB3TX5TP1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const firestore = getFirestore(app);
+
+        // Get modal elements
+        const successModal = document.getElementById('successModal');
+        const errorModal = document.getElementById('errorModal');
+        const closeSuccessModal = document.getElementById('closeSuccessModal');
+        const closeErrorModal = document.getElementById('closeErrorModal');
+        const reEnterButton = document.getElementById('reEnterButton');
+
+        // Login button event listener
+        document.getElementById('loginButton').addEventListener('click', async () => {
+            const phoneNumber = document.getElementById('phoneNumberInput').value;
+            const code = document.getElementById('codeInput').value;
+
+            if (phoneNumber && code) {
+                try {
+                    // Check Firebase Realtime Database (Admin section)
+                    const adminRef = ref(database, 'Admin/' + phoneNumber);
+                    const snapshot = await get(adminRef);
+                    
+                    if (snapshot.exists() && snapshot.val().code === code) {
+                        // Show success modal and redirect
+                        successModal.style.display = "block";
+                        setTimeout(() => {
+                            window.location.href = 'main.html';
+                        }, 2000); // Redirect after 2 seconds
+                    } else {
+                        // Check Firestore (Admin section)
+                        const adminQuery = query(collection(firestore, 'Admin'), where('phoneNumber', '==', phoneNumber), where('code', '==', code));
+                        const querySnapshot = await getDocs(adminQuery);
+                        
+                        if (!querySnapshot.empty) {
+                            // Show success modal and redirect
+                            successModal.style.display = "block";
+                            setTimeout(() => {
+                                window.location.href = 'main.html';
+                            }, 2000); // Redirect after 2 seconds
+                        } else {
+                            // Show error modal
+                            errorModal.style.display = "block";
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error logging in: ", error);
+                    // Show error modal
+                    errorModal.style.display = "block";
+                }
+            } else {
+                alert('Please enter both phone number and code.');
+            }
+        });
+
+        // Close success modal event listener
+        closeSuccessModal.addEventListener('click', () => {
+            successModal.style.display = "none";
+        });
+
+        // Close error modal event listener
+        closeErrorModal.addEventListener('click', () => {
+            errorModal.style.display = "none";
+        });
+
+        // Re-enter button event listener
+        reEnterButton.addEventListener('click', () => {
+            errorModal.style.display = "none";
+        });
+
+        // Close modal if clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == successModal) {
+                successModal.style.display = "none";
+            }
+            if (event.target == errorModal) {
+                errorModal.style.display = "none";
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 400px;
+            margin: 20px 0;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #0056b3;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <h1>Payment</h1>
+    <input type="number" id="serialNumberInput" placeholder="Enter Serial Number" min="1">
+    <input type="number" id="amountInput" placeholder="Enter Amount" min="1">
+    <div class="button-container">
+        <button id="payButton">Pay</button>
+        <button id="backButton">Back</button>
+    </div>
+
+    <script type="module">
+        // Event listeners
+        document.getElementById('payButton').addEventListener('click', async () => {
+            const serialNumber = document.getElementById('serialNumberInput').value;
+            const amount = document.getElementById('amountInput').value;
+
+            if (serialNumber && amount) {
+                alert('Processing payment...');
+                // Payment processing logic goes here
+            } else {
+                alert('Please enter both serial number and amount.');
+            }
+        });
+
+        document.getElementById('backButton').addEventListener('click', () => {
+            window.location.href = 'main.html';
+        });
+    </script>
+</body>
+</html>

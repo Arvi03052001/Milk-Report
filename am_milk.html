@@ -147,7 +147,7 @@
     <h1>AM Milk Record</h1>
     
     <input type="number" id="serialNumberInput" placeholder="Enter Serial Number" min="1">
-    <input type="number" id="milkQuantityInput" placeholder="Enter Milk Quantity" min="0">
+    <input type="number" id="milkQuantityInput" placeholder="Enter Milk Quantity" min="0" step="0.1">
     <div class="button-container">
         <button id="okButton">OK</button>
         <button id="backButton">Back</button>
@@ -165,13 +165,12 @@
         <tbody>
             <tr>
                 <td>Count</td>
-                <td>Data 2 Value</td>
+                <td id="data2Value">00</td> <!-- Updated ID for redirection -->
                 <td id="userCount">Loading...</td>
             </tr>
         </tbody>
     </table>
        
-
     <!-- Morning Data Button -->
     <div class="extra-button">
         <button id="morningDataButton">MORNING DATA</button>
@@ -191,7 +190,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
     
         const firebaseConfig = {
             apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
@@ -219,7 +218,10 @@
             const milkQuantity = document.getElementById('milkQuantityInput').value;
     
             if (serialNumber && milkQuantity) {
-                confirmationText.textContent = `Are you sure you want to add the milk with Serial Number: ${serialNumber} and Quantity: ${milkQuantity}?`;
+                const now = new Date();
+                const date = now.toLocaleDateString('en-US'); // MM/DD/YYYY
+                const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // HH:MM AM/PM
+                confirmationText.textContent = `Are you sure you want to add the milk with Serial Number: ${serialNumber}, Quantity: ${milkQuantity}, Date: ${date}, Time: ${time}?`;
                 modal.style.display = "block";
             } else {
                 alert('Please enter both serial number and milk quantity.');
@@ -230,25 +232,34 @@
         confirmButton.addEventListener('click', async () => {
             const serialNumber = document.getElementById('serialNumberInput').value;
             const milkQuantity = document.getElementById('milkQuantityInput').value;
-    
+            const now = new Date();
+            const date = now.toLocaleDateString('en-US'); // MM/DD/YYYY
+            const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // HH:MM AM/PM
+
             try {
-                const milkRef = ref(database, 'milk/' + serialNumber);
-                await set(milkRef, { serialNumber: serialNumber, milkQuantity: milkQuantity });
-    
+                // Realtime Database path: /milk/AM/
+                const milkRef = ref(database, `milk/AM/${serialNumber}`);
+                await set(milkRef, {
+                    serialNumber: serialNumber,
+                    milkQuantity: milkQuantity,
+                    date: date,
+                    time: time
+                });
+
                 // Clear input fields
                 document.getElementById('serialNumberInput').value = '';
                 document.getElementById('milkQuantityInput').value = '';
+
+                // Close the modal
                 modal.style.display = "none";
             } catch (error) {
-                console.error("Error adding milk: ", error);
+                console.error("Error saving data: ", error);
+                alert('Failed to save data. Please try again.');
             }
         });
-    
-        // Cancel button or close icon in the modal
+
+        // Cancel button in the modal
         cancelButton.addEventListener('click', () => {
-            modal.style.display = "none";
-        });
-        closeModal.addEventListener('click', () => {
             modal.style.display = "none";
         });
     
@@ -257,11 +268,11 @@
             window.location.href = 'main.html';
         });
 
-        // Morning Data button event listener
+        // Back button event listener
         document.getElementById('morningDataButton').addEventListener('click', () => {
             window.location.href = 'morning_data.html';
         });
-
+    
         // Fetch user count and update the table
         async function updateUserCount() {
             try {
@@ -289,7 +300,12 @@
 
         // Update user count on page load
         updateUserCount();
-
+    
+        // Redirect to am_countlist.html when Data 2 Value cell is clicked
+        document.getElementById('data2Value').addEventListener('click', () => {
+            window.location.href = 'am_countlist.html';
+        });
+    
         // Close modal if clicking outside of it
         window.onclick = function(event) {
             if (event.target == modal) {

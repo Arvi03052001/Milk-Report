@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
-import { getDatabase, ref, set, update, remove } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+import { getDatabase, ref, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -103,6 +103,26 @@ function applyTranslations(translations) {
     // Apply translations to other elements similarly
 }
 
+// Function to display user data in am_countlist.html
+function displayUserData() {
+    const userTable = document.getElementById('user-table');
+    const userRef = ref(database, 'users');
+    
+    onValue(userRef, (snapshot) => {
+        userTable.innerHTML = ''; // Clear table content
+
+        snapshot.forEach(childSnapshot => {
+            const userData = childSnapshot.val();
+            const row = userTable.insertRow();
+            row.insertCell(0).textContent = childSnapshot.key;  // Serial Number
+            row.insertCell(1).textContent = userData.name || 'No Name';  // Name
+        });
+    }, (error) => {
+        console.error('Error fetching user data:', error.message);
+        document.getElementById('message').innerText = 'Error fetching user data. Please try again.';
+    });
+}
+
 // Setup event listeners and Firebase interactions on page load
 document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
@@ -114,4 +134,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Apply saved language on page load
     const savedLanguage = localStorage.getItem('language') || 'en';
     setLanguage(savedLanguage);
+
+    // Display user data if on the am_countlist.html page
+    if (document.body.id === 'am_countlist') {
+        displayUserData();
+    }
 });
+
+// Register the service worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+                console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(error => {
+                console.error('Service Worker registration failed:', error);
+            });
+    });
+}

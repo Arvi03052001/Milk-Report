@@ -210,7 +210,7 @@
                     let priceHistory = '';
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
-                        const priceDetails = Price: ${data.price} Rs<br>Date: ${data.date}, ${data.time};
+                       const priceDetails = `Price: ${data.price} Rs<br>Date: ${data.date}, ${data.time}`;
                         if (!latestPrice) {
                             latestPrice = priceDetails;
                         }

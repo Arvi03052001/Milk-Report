@@ -36,7 +36,7 @@
             flex-wrap: wrap;
         }
 
-        button {
+       button {
             padding: 15px 30px;
             font-size: 1.2em;
             cursor: pointer;
@@ -44,13 +44,17 @@
             border-radius: 5px;
             background-color: #007bff;
             color: white;
-            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
             transition: background-color 0.3s, transform 0.3s;
         }
-
         button:hover {
             background-color: #0056b3;
-            transform: scale(1.05);
+        }
+
+        .highlighted {
+            background-color: #28a745; /* Highlight color */
+        }
+.greyed-out {
+            background-color: grey; /* Grey out non-active button */
         }
 
         button:active {
@@ -207,6 +211,48 @@
             const savedLanguage = localStorage.getItem('language') || 'en';
             setLanguage(savedLanguage);
         });
+		function highlightButtonBasedOnTime() {
+            const amButton = document.getElementById('amButton');
+            const pmButton = document.getElementById('pmButton');
+            const currentTime = new Date();
+            const currentHour = currentTime.getHours();
+
+            if (currentHour >= 0 && currentHour <= 15) {
+                amButton.classList.add('highlighted');
+                pmButton.classList.add('greyed-out');
+                return 'AM'; // Return current time period
+            } else if (currentHour >= 16 && currentHour <= 23) {
+                pmButton.classList.add('highlighted');
+                amButton.classList.add('greyed-out');
+                return 'PM'; // Return current time period
+            }
+        }
+
+        function handleButtonClick(event, targetTimePeriod, redirectUrl) {
+            const currentPeriod = highlightButtonBasedOnTime();
+            if (currentPeriod !== targetTimePeriod) {
+                const continueAction = confirm(`Current time is ${currentPeriod}. Do you still want to continue?`);
+                if (!continueAction) {
+                    return;
+                }
+            }
+            window.location.href = redirectUrl;
+        }
+
+        window.onload = () => {
+            highlightButtonBasedOnTime();
+
+            document.getElementById('amButton').addEventListener('click', (event) => {
+                handleButtonClick(event, 'AM', 'am_milk.html');
+            });
+
+            document.getElementById('pmButton').addEventListener('click', (event) => {
+                handleButtonClick(event, 'PM', 'pm_milk.html');
+            });
+        };
+
+        // Run the function on page load
+        window.onload = highlightButtonBasedOnTime;
     </script>
 </body>
 </html>

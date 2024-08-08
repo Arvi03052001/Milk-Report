@@ -201,6 +201,7 @@
                 try {
                     // Fetch latest price from Firestore
                     const priceQuery = query(collection(firestore, 'prices'), orderBy('date', 'desc'));
+                    alert(priceQuery);
                     const querySnapshot = await getDocs(priceQuery);
                     
                     let latestPrice = '';

@@ -200,7 +200,7 @@
             async function updateDisplay() {
                 try {
                     // Fetch latest price from Firestore
-                    const priceQuery = query(collection(firestore, 'prices'), orderBy('date', 'desc'));
+                    const priceQuery = query(collection(firestore, 'prices'), orderBy('date', 'desc'),orderBy('time', 'desc'));
                     const querySnapshot = await getDocs(priceQuery);
                     console.log(querySnapshot);
                     

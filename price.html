@@ -201,7 +201,8 @@
               try {
                         const priceQuery = query(
                         collection(firestore, 'prices'),
-                        orderBy('date', 'desc')
+                        orderBy('date', 'desc'),
+                        orderBy('time', 'desc')
                     );
 
                     const querySnapshot = await getDocs(priceQuery);

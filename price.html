@@ -137,7 +137,7 @@
     </style>
 </head>
 <body>
-    <h1>Update Prize</h1>
+    <h1>Update Price</h1>
     <input type="number" id="priceInput" placeholder="Enter new price">
     <div class="button-container">
         <button id="okButton">OK</button>
@@ -166,11 +166,10 @@
             </div>
         </div>
     </div>
-  
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
-        import { getFirestore, doc, setDoc, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore.js";
+        import { getDatabase, ref, set, get, push, child } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
@@ -184,7 +183,6 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const firestore = getFirestore(app);
 
         document.addEventListener('DOMContentLoaded', () => {
             const priceInput = document.getElementById('priceInput');
@@ -198,32 +196,38 @@
             const priceHistoryBox = document.getElementById('priceHistoryBox');
 
             async function updateDisplay() {
-              try {
-                        const priceQuery = query(
-                        collection(firestore, 'prices'),
-                        orderBy('date', 'desc')
-                    );
-
-                    const querySnapshot = await getDocs(priceQuery);
-                    
-                    let latestPrice = '';
-                    let priceHistory = '';
-                    querySnapshot.forEach(doc => {
-                        const data = doc.data();
-                       const priceDetails = `Price: ${data.price} Rs<br>Date: ${data.date}, ${data.time}`;
-                        if (!latestPrice) {
-                            latestPrice = priceDetails;
-                        }
-                        priceHistory += `<div class="price-item">${priceDetails}</div>`;
-                    });
-                    
-                    latestPriceBox.querySelector('.box-content').innerHTML = latestPrice;
-                    priceHistoryBox.querySelector('.price-list').innerHTML = priceHistory;
-
+                try {
+                    // Fetch price data from Realtime Database
+                    const priceRef = ref(database, 'prices');
+                    const snapshot = await get(priceRef);
+            
+                    if (snapshot.exists()) {
+                        const prices = snapshot.val();
+                        let latestPrice = '';
+                        let priceHistory = '';
+            
+                        // Convert the prices object to an array and sort by date and time in descending order
+                        const sortedPrices = Object.keys(prices).map(key => ({ key, ...prices[key] }))
+                            .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+            
+                        sortedPrices.forEach(({ price, date, time }, index) => {
+                            const priceDetails = `Price: ${price} Rs<br>Date: ${date}, ${time}`;
+                            if (index === 0) {
+                                latestPrice = priceDetails;
+                            }
+                            priceHistory += `<div class="price-item">${priceDetails}</div>`;
+                        });
+            
+                        latestPriceBox.querySelector('.box-content').innerHTML = latestPrice;
+                        priceHistoryBox.querySelector('.price-list').innerHTML = priceHistory;
+                    } else {
+                        latestPriceBox.querySelector('.box-content').textContent = 'No prices available.';
+                        priceHistoryBox.querySelector('.price-list').textContent = 'No price history available.';
+                    }
                 } catch (error) {
                     console.error("Error fetching price data: ", error);
                 }
-            }
+            }            
 
             okButton.addEventListener('click', () => {
                 const price = priceInput.value;
@@ -240,10 +244,6 @@
                             const priceRef = ref(database, 'prices');
                             const newPriceRef = push(priceRef);
                             await set(newPriceRef, { price: price, date: date, time: time });
-                            
-                            // Store in Firestore
-                            const priceDocRef = doc(collection(firestore, 'prices'));
-                            await setDoc(priceDocRef, { price: price, date: date, time: time });
 
                             // Update display
                             updateDisplay();
@@ -259,8 +259,6 @@
                     cancelButton.addEventListener('click', () => {
                         confirmationModal.style.display = "none";
                     });
-                } else {
-                    alert('Please enter a price.');
                 }
             });
 

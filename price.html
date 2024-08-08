@@ -214,7 +214,7 @@
                         if (!latestPrice) {
                             latestPrice = priceDetails;
                         }
-                        priceHistory += <div class="price-item">${priceDetails}</div>;
+                        priceHistory += `<div class="price-item">${priceDetails}</div>`;
                     });
                     
                     latestPriceBox.querySelector('.box-content').innerHTML = latestPrice;

@@ -211,25 +211,28 @@
             const savedLanguage = localStorage.getItem('language') || 'en';
             setLanguage(savedLanguage);
         });
-		function highlightButtonBasedOnTime() {
+	    
+	function getCurrentTimePeriod() {
+            const currentHour = new Date().getHours();
+            return (currentHour >= 0 && currentHour <= 15) ? 'AM' : 'PM';
+        }
+
+        function highlightButtonBasedOnTime() {
+            const currentPeriod = getCurrentTimePeriod();
             const amButton = document.getElementById('amButton');
             const pmButton = document.getElementById('pmButton');
-            const currentTime = new Date();
-            const currentHour = currentTime.getHours();
 
-            if (currentHour >= 0 && currentHour <= 15) {
+            if (currentPeriod === 'AM') {
                 amButton.classList.add('highlighted');
                 pmButton.classList.add('greyed-out');
-                return 'AM'; // Return current time period
-            } else if (currentHour >= 16 && currentHour <= 23) {
+            } else {
                 pmButton.classList.add('highlighted');
                 amButton.classList.add('greyed-out');
-                return 'PM'; // Return current time period
             }
         }
 
-        function handleButtonClick(event, targetTimePeriod, redirectUrl) {
-            const currentPeriod = highlightButtonBasedOnTime();
+        function handleButtonClick(targetTimePeriod, redirectUrl) {
+            const currentPeriod = getCurrentTimePeriod();
             if (currentPeriod !== targetTimePeriod) {
                 const continueAction = confirm(`Current time is ${currentPeriod}. Do you still want to continue?`);
                 if (!continueAction) {
@@ -242,17 +245,14 @@
         window.onload = () => {
             highlightButtonBasedOnTime();
 
-            document.getElementById('amButton').addEventListener('click', (event) => {
-                handleButtonClick(event, 'AM', 'am_milk.html');
+            document.getElementById('amButton').addEventListener('click', () => {
+                handleButtonClick('AM', 'am_milk.html');
             });
 
-            document.getElementById('pmButton').addEventListener('click', (event) => {
-                handleButtonClick(event, 'PM', 'pm_milk.html');
+            document.getElementById('pmButton').addEventListener('click', () => {
+                handleButtonClick('PM', 'pm_milk.html');
             });
         };
-
-        // Run the function on page load
-        window.onload = highlightButtonBasedOnTime;
     </script>
 </body>
 </html>

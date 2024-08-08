@@ -214,7 +214,11 @@
 	    
 	function getCurrentTimePeriod() {
             const currentHour = new Date().getHours();
-            return (currentHour >= 0 && currentHour <= 15) ? 'AM' : 'PM';
+	        if (currentHour >= 0 && currentHour < 12) {
+	            return 'AM';
+	        } else {
+	            return 'PM';
+	        }
         }
 
         function highlightButtonBasedOnTime() {

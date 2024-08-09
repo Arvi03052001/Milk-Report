@@ -30,7 +30,11 @@
 
         td {
             border: 1px solid #ddd;
-            padding: 10px;
+        }
+
+        th {
+            border: 1px solid #ddd;
+            padding: 20px;
             text-align: center;
         }
 
@@ -60,6 +64,17 @@
         button:active {
             transform: scale(0.95);
         }
+
+        /* Input Styles */
+        input[type="number"] {
+            width: 100%;
+            padding: 20px; /* Remove padding to align with cell */
+            border: none; /* Remove border to match cell border */
+            font-size: 1em; /* Adjust font size to match text */
+            text-align: center; /* Center text inside input */
+            box-sizing: border-box; /* Ensure padding and border are included in width */
+        }
+
     </style>
 </head>
 <body>
@@ -67,51 +82,59 @@
 
     <!-- Table -->
     <table>
+        <thead>
+            <tr>
+                <th>Summary</th>
+                <th>Quantity</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
         <tbody>
             <tr>
-                <td>Members Milk</td>
-                <td>Row 1, Col 2</td>
+                <td style="padding: 20px;">5OI</td>
+                <td><input type="number" id="value1" placeholder="Enter Value1"></td>
+                <td id="value2" style="padding: 2px;">0</td>
+            </tr>
+            <!-- Other rows remain the same -->
+            <tr>
+                <td style="padding: 5px;">Members Milk</td>
+                <td><input type="number" id="value3" placeholder="Enter Value3"></td>
+                <td>Value4</td>
             </tr>
             <tr>
-                <td>Non-Members Milk</td>
-                <td>Row 2, Col 2</td>
+                <td style="padding: 5px;">Non-Members Milk</td>
+                <td><input type="number" id="value5" placeholder="Enter Value5"></td>
+                <td>value6</td>
             </tr>
             <tr>
-                <td>Total Milk (L)</td>
-                <td>Row 3, Col 2</td>
+                <td style="padding: 20px;">Total Milk (L)</td>
+                <td id="value7">0</td>
+                <td>value8</td>
             </tr>
             <tr>
-                <td>Village Milk (L)</td>
-                <td>Row 4, Col 2</td>
+                <td style="padding: 20px;">Village Milk (L)</td>
+                <td>value9</td>
+                <td>value10</td>
             </tr>
             <tr>
-                <td>Milk left (L)</td>
-                <td>Row 5, Col 2</td>
+                <td style="padding: 20px;">Milk left (L)</td>
+                <td>value11</td>
+                <td>value12</td>
             </tr>
             <tr>
-                <td>Estimated More Milk (KG) </td>
-                <td>Row 6, Col 2</td>
+                <td style="padding: 20px;">Estimated More Milk (KG)</td>
+                <td>value13</td>
+                <td>value14</td>
             </tr>
             <tr>
-                <td>Total Qty Milk (Kg)</td>
-                <td>Row 7, Col 2</td>
+                <td style="padding: 20px;">Total Qty Milk (Kg)</td>
+                <td>value15</td>
+                <td>value16</td>
             </tr>
             <tr>
-                <td>More weight / Less weight</td>
-                <td>Row 8, Col 2</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <table>
-        <tbody>
-            <tr>
-                <td>Total Milk (L) x Price </td>
-                <td>Row 1, Col 2</td>
-            </tr>
-            <tr>
-                <td>Village Milk (L) x Price </td>
-                <td>Row 2, Col 2</td>
+                <td style="padding: 20px;">More weight / Less weight</td>
+                <td>value17</td>
+                <td>value18</td>
             </tr>
         </tbody>
     </table>
@@ -120,5 +143,89 @@
     <div class="button-container">
         <button onclick="window.history.back();">Back</button>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
+            authDomain: "milk-2dd07.firebaseapp.com",
+            projectId: "milk-2dd07",
+            storageBucket: "milk-2dd07.appspot.com",
+            messagingSenderId: "1013506317972",
+            appId: "1:1013506317972:web:d0143c779469ac96be1e81",
+            measurementId: "G-TXB3TX5TP1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const analytics = getAnalytics(app);
+
+        async function getLatestPrice() {
+            const priceRef = ref(database, 'prices'); // Path to the 'prices' node
+            try {
+                const snapshot = await get(priceRef);
+                if (snapshot.exists()) {
+                    const prices = snapshot.val();
+                    const latestPriceId = Object.keys(prices).reduce((latestId, currentId) => {
+                        // Compare timestamps to find the most recent one
+                        return parseInt(currentId) > parseInt(latestId) ? currentId : latestId;
+                    });
+                    // Return the price associated with the most recent ID
+                    return parseFloat(prices[latestPriceId].price);
+                } else {
+                    console.error('No data available');
+                    return 0; // Default value if no data found
+                }
+            } catch (error) {
+                console.error('Error getting data:', error);
+                return 0; // Default value in case of error
+            }
+        }
+                
+
+        async function getTotalMilkQuantity() {
+            const milkRef = ref(database, 'milk/AM'); // Path to AM data
+            try {
+                const snapshot = await get(milkRef);
+                if (snapshot.exists()) {
+                    const milkData = snapshot.val();
+                    let totalQuantity = 0;
+                    for (const serialNumber in milkData) {
+                        if (milkData.hasOwnProperty(serialNumber)) {
+                            totalQuantity += parseFloat(milkData[serialNumber].milkQuantity) || 0;
+                        }
+                    }
+                    console.log('Total Milk Quantity:', totalQuantity);
+                    return totalQuantity;
+                } else {
+                    console.error('No data available');
+                    return 0; // Default value if no data found
+                }
+            } catch (error) {
+                console.error('Error getting data:', error);
+                return 0; // Default value in case of error
+            }
+        }
+
+        document.getElementById('value1').addEventListener('input', async function() {
+            const value1 = parseFloat(this.value) || 0;
+            const latestPrice = await getLatestPrice();
+            const result = value1 * latestPrice;
+            document.getElementById('value2').textContent = result.toFixed(2);
+        });
+        
+
+        // Fetch and display the total milk quantity in value7 cell
+        async function updateMilkQuantity() {
+            const totalMilkQuantity = await getTotalMilkQuantity();
+            document.getElementById('value7').textContent = totalMilkQuantity.toFixed(2);
+        }
+
+        // Call updateMilkQuantity when the page loads
+        updateMilkQuantity();
+    </script>
 </body>
 </html>

@@ -122,6 +122,8 @@
                         userCard.innerHTML = `
                             <p><strong>Serial Number:</strong> ${user.serialNumber}</p>
                             <p><strong>Name:</strong> ${user.name}</p>
+                            <p><strong>Account Number:</strong> ${user.bankAccount}</p>
+                            <p><strong>IFSC Number:</strong> ${user.ifscCode}</p>
                             <p><strong>Date:</strong> ${formatDate(user.date)}</p>
                         `;
                         userListContainer.appendChild(userCard);

@@ -130,17 +130,16 @@
                         serialCell.textContent = serial;
                         nameCell.textContent = user.name || 'No Name';
 
-                        // Fetch milk quantity from Firestore
+                        // Fetch milk quantity from Realtime Database
                         try {
-                            const docRef = collection(firestore, 'am_milk');
-                            const querySnapshot = await getDocs(docRef);
+                            const milkRef = ref(database, `milk/AM/${serial}`);
+                            const milkSnapshot = await get(milkRef);
+
                             let milkQty = '---';
-                            
-                            querySnapshot.forEach(doc => {
-                                if (doc.id === serial) {
-                                    milkQty = doc.data().quantity || '---';
-                                }
-                            });
+                            if (milkSnapshot.exists()) {
+                                const milkData = milkSnapshot.val();
+                                milkQty = milkData.milkQuantity || '---';
+                            }
 
                             milkQtyCell.textContent = milkQty;
                         } catch (error) {

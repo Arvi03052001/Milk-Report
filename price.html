@@ -88,14 +88,19 @@
             color: #555;
         }
 
-        .price-list {
+        .history-container {
+            margin-top: 20px;
             text-align: left;
-            font-size: 1em;
         }
 
-        .price-item {
-            border-bottom: 1px solid #ddd;
+        .history-item {
+            margin-bottom: 10px;
             padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
         }
 
         .modal {
@@ -149,11 +154,11 @@
         <div class="box-header">Latest Price</div>
         <div class="box-content">Loading...</div>
     </div>
-    
+
     <!-- Price History Display Box -->
     <div id="priceHistoryBox" class="display-box">
         <div class="box-header">Price History</div>
-        <div class="price-list">Loading...</div>
+        <div id="priceHistory" class="history-container">Loading...</div>
     </div>
 
     <!-- Modal -->
@@ -169,7 +174,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
-        import { getDatabase, ref, set, get, push, child } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+        import { getDatabase, ref, set, get, push } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
@@ -194,6 +199,9 @@
             const cancelButton = document.getElementById('cancelButton');
             const latestPriceBox = document.getElementById('latestPriceBox');
             const priceHistoryBox = document.getElementById('priceHistoryBox');
+            const priceHistory = document.getElementById('priceHistory');
+
+            let lastPrice = null;
 
             async function updateDisplay() {
                 try {
@@ -204,25 +212,33 @@
                     if (snapshot.exists()) {
                         const prices = snapshot.val();
                         let latestPrice = '';
-                        let priceHistory = '';
-            
+                        let historyHtml = '';
+
                         // Convert the prices object to an array and sort by date and time in descending order
                         const sortedPrices = Object.keys(prices).map(key => ({ key, ...prices[key] }))
                             .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
             
-                        sortedPrices.forEach(({ price, date, time }, index) => {
-                            const priceDetails = `Price: ${price} Rs<br>Date: ${date}, ${time}`;
-                            if (index === 0) {
-                                latestPrice = priceDetails;
-                            }
-                            priceHistory += `<div class="price-item">${priceDetails}</div>`;
-                        });
-            
-                        latestPriceBox.querySelector('.box-content').innerHTML = latestPrice;
-                        priceHistoryBox.querySelector('.price-list').innerHTML = priceHistory;
+                        if (sortedPrices.length > 0) {
+                            // Display the latest price
+                            const { price, date, time } = sortedPrices[0];
+                            latestPrice = `Price: ${price} Rs<br>Date: ${date}, ${time}`;
+                            latestPriceBox.querySelector('.box-content').innerHTML = latestPrice;
+
+                            // Display price history
+                            sortedPrices.forEach(({ price, date, time }) => {
+                                historyHtml += `<div class="history-item">Price: ${price} Rs<br>Date/Time: ${date}, ${time}</div>`;
+                            });
+                            priceHistory.innerHTML = historyHtml;
+
+                            // Store the latest price to prevent duplicate storage
+                            lastPrice = latestPrice;
+                        } else {
+                            latestPriceBox.querySelector('.box-content').textContent = 'No prices available.';
+                            priceHistory.innerHTML = 'No price history available.';
+                        }
                     } else {
                         latestPriceBox.querySelector('.box-content').textContent = 'No prices available.';
-                        priceHistoryBox.querySelector('.price-list').textContent = 'No price history available.';
+                        priceHistory.innerHTML = 'No price history available.';
                     }
                 } catch (error) {
                     console.error("Error fetching price data: ", error);
@@ -240,33 +256,28 @@
                     
                     updateButton.addEventListener('click', async () => {
                         try {
-                            // Store in Realtime Database
-                            const priceRef = ref(database, 'prices');
-                            const newPriceRef = push(priceRef);
-                            await set(newPriceRef, { price: price, date: date, time: time });
-
-                            // Update display
-                            updateDisplay();
-
-                            // Clear input
+                            const priceRef = ref(database, 'prices/' + Date.now());
+                            await set(priceRef, { price, date, time });
+                            confirmationModal.style.display = "none";
                             priceInput.value = '';
+                            updateDisplay();
                         } catch (error) {
                             console.error("Error updating price: ", error);
                         }
-                        confirmationModal.style.display = "none";
                     });
 
                     cancelButton.addEventListener('click', () => {
                         confirmationModal.style.display = "none";
                     });
+                } else {
+                    alert("Please enter a price.");
                 }
             });
 
             backButton.addEventListener('click', () => {
-                window.location.href = 'main.html';
+                window.location.href = "main.html";
             });
 
-            // Initial display update
             updateDisplay();
         });
     </script>

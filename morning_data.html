@@ -78,6 +78,7 @@
     </style>
 </head>
 <body>
+
     <h1>Morning Data</h1>
 
     <!-- Table -->
@@ -92,52 +93,56 @@
         <tbody>
             <tr>
                 <td style="padding: 20px;">5OI</td>
-                <td><input type="number" id="value1" placeholder="Enter Value1"></td>
-                <td id="value2" style="padding: 2px;">0</td>
+                <td><input type="number" id="SOIQty" placeholder="Enter SOIQty"></td>
+                <td id="SOIAmt" style="padding: 2px;">0</td>
             </tr>
             <!-- Other rows remain the same -->
             <tr>
                 <td style="padding: 5px;">Members Milk</td>
-                <td><input type="number" id="value3" placeholder="Enter Value3"></td>
-                <td>Value4</td>
+                <td><input type="number" id="memQty" placeholder="Enter memQty"></td>
+                <td id="memAmt" style="padding: 2px;">0</td>
             </tr>
             <tr>
                 <td style="padding: 5px;">Non-Members Milk</td>
-                <td><input type="number" id="value5" placeholder="Enter Value5"></td>
-                <td>value6</td>
+                <td><input type="number" id="nonmemQty" placeholder="Enter nonmemQty"></td>
+                <td id="nonmemAmt" style="padding: 2px;">0</td>
             </tr>
             <tr>
                 <td style="padding: 20px;">Total Milk (L)</td>
-                <td id="value7">0</td>
-                <td>value8</td>
+                <td id="totmilkQty">0</td>
+                <td id="totmilkAmt" style="padding: 2px;">0</td>
             </tr>
             <tr>
                 <td style="padding: 20px;">Village Milk (L)</td>
-                <td>value9</td>
-                <td>value10</td>
+                <td><input type="number" id="vilmilkQty" placeholder="Enter vilmilkQty"></td>
+                <td id="vilmilkAmt" style="padding: 2px;">0</td>
             </tr>
             <tr>
                 <td style="padding: 20px;">Milk left (L)</td>
-                <td>value11</td>
-                <td>value12</td>
+                <td id="milkleftQty" style="padding: 2px;">0</td>
+                <td id="milkleftAmt" style="padding: 2px;">0</td>
             </tr>
             <tr>
                 <td style="padding: 20px;">Estimated More Milk (KG)</td>
-                <td>value13</td>
-                <td>value14</td>
+                <td id="EstmilkQty" style="padding: 2px;">0</td>
+                <td>0</td>
             </tr>
             <tr>
                 <td style="padding: 20px;">Total Qty Milk (Kg)</td>
-                <td>value15</td>
-                <td>value16</td>
+                <td id="totkgmilkQty" style="padding: 2px;">0</td>
+                <td id="value16" style="padding: 2px;">0</td>
             </tr>
             <tr>
                 <td style="padding: 20px;">More weight / Less weight</td>
-                <td>value17</td>
-                <td>value18</td>
+                <td id="value17" style="padding: 2px;">0</td>
+                <td id="value18" style="padding: 2px;">0</td>
             </tr>
         </tbody>
     </table>
+
+    <div class="button-container" style="margin-top: 20px;">
+        <button id="updateButton">Update</button>
+    </div>
 
     <!-- Back Button -->
     <div class="button-container">
@@ -210,22 +215,97 @@
             }
         }
 
-        document.getElementById('value1').addEventListener('input', async function() {
-            const value1 = parseFloat(this.value) || 0;
+        document.getElementById('SOIQty').addEventListener('input', async function() {
+            const SOIQty = parseFloat(this.value) || 0;
             const latestPrice = await getLatestPrice();
-            const result = value1 * latestPrice;
-            document.getElementById('value2').textContent = result.toFixed(2);
+            const result = SOIQty * latestPrice;
+            document.getElementById('SOIAmt').textContent = result.toFixed(2);
         });
-        
 
-        // Fetch and display the total milk quantity in value7 cell
+        document.getElementById('memQty').addEventListener('input', async function() {
+            const memQty = parseFloat(this.value) || 0;
+            const latestPrice = await getLatestPrice();
+            const result = memQty * latestPrice;
+            document.getElementById('memAmt').textContent = result.toFixed(2);
+        });
+
+        document.getElementById('nonmemQty').addEventListener('input', async function() {
+            const nonmemQty = parseFloat(this.value) || 0;
+            const latestPrice = await getLatestPrice();
+            const result = nonmemQty * latestPrice;
+            document.getElementById('nonmemAmt').textContent = result.toFixed(2);
+        });
+
+        document.getElementById('vilmilkQty').addEventListener('input', async function() {
+            const vilmilkQty = parseFloat(this.value) || 0;
+            const latestPrice = await getLatestPrice();
+            const result = vilmilkQty * latestPrice;
+            document.getElementById('vilmilkAmt').textContent = result.toFixed(2);
+        });
+
+        document.getElementById('vilmilkQty').addEventListener('input', async function() {
+            const totmilkQty = parseFloat(document.getElementById('totmilkQty').textContent) || 0;
+            const vilmilkQty = parseFloat(this.value) || 0;
+            const result = totmilkQty - vilmilkQty;
+            document.getElementById('milkleftQty').textContent = result.toFixed(2);
+            
+            // Call updatemilkleftAmt whenever milkleftQty changes
+            await updatemilkleftAmt();
+
+            // Call updateEstmilkQty to update EstmilkQty based on milkleftQty
+            await updateEstmilkQty();
+
+            // Call updatetotkgmilkQty to update totkgmilkQty based on milkleftQty and the current totkgmilkQty
+            await updatetotkgmilkQty();
+        });
+
+        // Fetch and display the total milk quantity in totmilkQty cell
         async function updateMilkQuantity() {
             const totalMilkQuantity = await getTotalMilkQuantity();
-            document.getElementById('value7').textContent = totalMilkQuantity.toFixed(2);
+            const latestPrice = await getLatestPrice();
+            
+            // Update totmilkQty with total milk quantity
+            document.getElementById('totmilkQty').textContent = totalMilkQuantity.toFixed(2);
+            
+            // Calculate and update totmilkAmt (total milk quantity multiplied by latest price)
+            const totalValue = totalMilkQuantity * latestPrice;
+            document.getElementById('totmilkAmt').textContent = totalValue.toFixed(2);
+
         }
+
+        // Function to update milkleftAmt
+        async function updatemilkleftAmt() {
+            const milkleftQty = parseFloat(document.getElementById('milkleftQty').textContent) || 0;
+            const latestPrice = await getLatestPrice();
+            const result = milkleftQty * latestPrice;
+            document.getElementById('milkleftAmt').textContent = result.toFixed(2);
+        }
+
+        async function updateEstmilkQty() {
+            const milkleftQty = parseFloat(document.getElementById('milkleftQty').textContent) || 0;
+            const result = (milkleftQty * 0.28)/10;
+            document.getElementById('EstmilkQty').textContent = result.toFixed(1);
+        }
+
+        async function updatetotkgmilkQty() {
+            const milkleftQty = parseFloat(document.getElementById('milkleftQty').textContent) || 0;
+            const EstmilkQty = parseFloat(document.getElementById('EstmilkQty').textContent) || 0;
+            const result = milkleftQty + EstmilkQty;
+            document.getElementById('totkgmilkQty').textContent = result.toFixed(2);
+        }
+        
+        async function handlemilkleftQtyUpdate() {
+            // Assuming this function is called whenever milkleftQty changes
+            updatemilkleftAmt();
+        }
+        
+        handlemilkleftQtyUpdate();
 
         // Call updateMilkQuantity when the page loads
         updateMilkQuantity();
+
     </script>
+
+
 </body>
 </html>

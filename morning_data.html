@@ -75,9 +75,39 @@
             box-sizing: border-box; /* Ensure padding and border are included in width */
         }
 
+        /* Full-screen modal styles */
+        #confirmModal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Ensure the modal is on top of other content */
+        }
+        #confirmModal > div {
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            width: 300px;
+            text-align: center;
+        }
+
     </style>
 </head>
 <body>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" style="display: none;">
+        <div style="background: white; padding: 20px; border: 1px solid #ddd; width: 300px; margin: 100px auto; text-align: center;">
+            <p>Sure to add data?</p>
+            <button id="confirmBtn">Confirm</button>
+            <button id="cancelBtn">Cancel</button>
+        </div>
+    </div>
 
     <h1>Morning Data</h1>
 
@@ -91,6 +121,7 @@
             </tr>
         </thead>
         <tbody>
+            
             <tr>
                 <td style="padding: 20px;">5OI</td>
                 <td><input type="number" id="SOIQty" placeholder="Enter SOIQty"></td>
@@ -113,7 +144,7 @@
                 <td id="totmilkAmt" style="padding: 2px;">0</td>
             </tr>
             <tr>
-                <td style="padding: 20px;">Village Milk (L)</td>
+                <td style="padding: 5px;">Village Milk (L)</td>
                 <td><input type="number" id="vilmilkQty" placeholder="Enter vilmilkQty"></td>
                 <td id="vilmilkAmt" style="padding: 2px;">0</td>
             </tr>
@@ -125,7 +156,7 @@
             <tr>
                 <td style="padding: 20px;">Estimated More Milk (KG)</td>
                 <td id="EstmilkQty" style="padding: 2px;">0</td>
-                <td>0</td>
+                <td id="value14" style="padding: 2px;">0</td>
             </tr>
             <tr>
                 <td style="padding: 20px;">Total Qty Milk (Kg)</td>
@@ -137,6 +168,13 @@
                 <td id="value17" style="padding: 2px;">0</td>
                 <td id="value18" style="padding: 2px;">0</td>
             </tr>
+            <tr>
+                <td style="padding: 5px;">CANE</td>
+                <td><input type="number" id="canQty" placeholder="CANE x"></td>
+                <td><input type="number" id="cankg" placeholder="Total CANE Kg"></td>
+            </tr>
+
+
         </tbody>
     </table>
 
@@ -151,7 +189,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
 
         const firebaseConfig = {
@@ -189,10 +227,88 @@
                 return 0; // Default value in case of error
             }
         }
+
+        // Function to show the confirmation dialog
+        function showConfirmationDialog() {
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        // Function to hide the confirmation dialog
+        function hideConfirmationDialog() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        // Event listener for the "Update" button
+        document.getElementById('updateButton').addEventListener('click', () => {
+            // Show confirmation modal
+            document.getElementById('confirmModal').style.display = 'flex';
+        });
+
+        // Event listener for the "Confirm" button in the confirmation dialog
+        document.getElementById('confirmBtn').addEventListener('click', async function() {
+        // Hide the confirmation dialog
+            hideConfirmationDialog();
+            
+            // Collect data from the form fields
+            const data = {
+                SOIQty: parseFloat(document.getElementById('SOIQty').value) || 0,
+                SOIAmt: parseFloat(document.getElementById('SOIAmt').textContent) || 0,
+                memQty: parseFloat(document.getElementById('memQty').value) || 0,
+                memAmt: parseFloat(document.getElementById('memAmt').textContent) || 0,
+                nonmemQty: parseFloat(document.getElementById('nonmemQty').value) || 0,
+                nonmemAmt: parseFloat(document.getElementById('nonmemAmt').textContent) || 0,
+                vilmilkQty: parseFloat(document.getElementById('vilmilkQty').value) || 0,
+                vilmilkAmt: parseFloat(document.getElementById('vilmilkAmt').textContent) || 0,
+                totmilkQty: parseFloat(document.getElementById('totmilkQty').textContent) || 0,
+                totmilkAmt: parseFloat(document.getElementById('totmilkAmt').textContent) || 0,
+                milkleftQty: parseFloat(document.getElementById('milkleftQty').textContent) || 0,
+                milkleftAmt: parseFloat(document.getElementById('milkleftAmt').textContent) || 0,
+                EstmilkQty: parseFloat(document.getElementById('EstmilkQty').textContent) || 0,
+                value14: parseFloat(document.getElementById('value14').textContent) || 0,
+                totkgmilkQty: parseFloat(document.getElementById('totkgmilkQty').textContent) || 0,
+                value16: parseFloat(document.getElementById('value16').textContent) || 0,
+                value17: parseFloat(document.getElementById('value17').textContent) || 0,
+                value18: parseFloat(document.getElementById('value18').textContent) || 0,
+                canQty: parseFloat(document.getElementById('canQty').value) || 0,
+                cankg: parseFloat(document.getElementById('cankg').value) || 0
+            };
+
+            // Get the current date as a string
+            const date = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+            // Reference to the Firebase Realtime Database path
+            const dbRef = ref(database, 'data/morning/' + date);
+
+            // Write data to Firebase Realtime Database
+            try {
+                await set(dbRef, data);
+                console.log('Data successfully written to Firebase!');
+                // Disable input fields
+                disableInputs();
+
+            } catch (error) {
+                console.error('Error writing data to Firebase:', error);
+            }
+        });
+
+        // Event listener for the "Cancel" button in the confirmation dialog
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            hideConfirmationDialog();
+        });
+
+        function getTodayDate() {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const year = today.getFullYear();
+            return `${month}-${day}-${year}`;
+        }
+        // Get today's date
+        const todayDate = getTodayDate();
                 
 
         async function getTotalMilkQuantity() {
-            const milkRef = ref(database, 'milk/AM'); // Path to AM data
+            const milkRef = ref(database, `milk/AM/${todayDate}`); // Path to AM data
             try {
                 const snapshot = await get(milkRef);
                 if (snapshot.exists()) {
@@ -305,7 +421,5 @@
         updateMilkQuantity();
 
     </script>
-
-
 </body>
 </html>

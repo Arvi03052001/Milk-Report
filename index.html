@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Launch Page</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
         body {
             display: flex;
             justify-content: center;
@@ -14,50 +18,96 @@
             background-color: #282c34;
             color: #ffffff;
             font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            animation: backgroundFade 2s forwards;
         }
         h1 {
             font-size: 4em;
             opacity: 0;
-            transform: scale(0.5);
-            animation: fadeInScale 3s forwards;
+            transform: scale(0.8);
+            animation: textAppear 3s forwards;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
         }
-        @keyframes fadeInScale {
+        @keyframes backgroundFade {
+            from {
+                background-color: #000000;
+            }
+            to {
+                background-color: #282c34;
+            }
+        }
+        @keyframes textAppear {
             0% {
                 opacity: 0;
-                transform: scale(0.5);
+                transform: scale(0.8);
             }
             100% {
                 opacity: 1;
                 transform: scale(1);
             }
         }
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        svg {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1; /* Send SVG to the background */
+        }
+        .milk {
+            position: center;
+            top: 10vh;
+            width: 100%;
+            text-align: center;
+        }
+        .milk h1 {
+            font-family: Myriad Pro, helvetica, arial;
+            font-size: 80pt;
+            letter-spacing: -0.08em;
+            color: #0086D1;
+            text-align: center; /* Fixed typo from 'cneter' to 'center' */
+        }
+        @media screen and (min-width: 1000px) {
+            .milk h1 {
+                font-size: 250pt;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Milk Record</h1>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
-        
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
-            authDomain: "milk-2dd07.firebaseapp.com",
-            projectId: "milk-2dd07",
-            storageBucket: "milk-2dd07.appspot.com",
-            messagingSenderId: "1013506317972",
-            appId: "1:1013506317972:web:d0143c779469ac96be1e81",
-            measurementId: "G-TXB3TX5TP1"
-        };
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-
+    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+        viewBox="30 80 350 800" enable-background="new 0 0 800 300" xml:space="preserve">
+        <path id="tale" fill="white" d="M800,0c0,0-33.523,0-85.947,0C659.441,0,584.316,0,505.21,0C370.093,0,223.361,0,147.387,0C110.54,0,0,0,0,0v-7.49h800V0z" />
+        <animate 
+            xlink:href="#tale"
+            attributeName="d" from="M800,0c0,0-33.523,0-85.947,0C659.441,0,584.316,0,505.21,0C370.093,0,223.361,0,147.387,0C110.54,0,0,0,0,0v-7.49h800V0z"
+            to="M800,0c0,0-33.523,0-85.947,0C659.441,0,584.316,0,505.21,0C370.093,0,223.361,0,147.387,0C110.54,0,0,0,0,0v-7.49h800V0z"
+            values="M800,0c0,0-33.523,0-85.947,0C659.441,0,584.316,0,505.21,0C370.093,0,223.361,0,147.387,0C110.54,0,0,0,0,0v-7.49h800V0z;  
+                M800,600c-93.432,21.77-104.52,949-173,949c-84.354,0,32-949-190-949c-240,0-74.194,1151.284-240,1151
+            C37.785,1750.728,0,600,0,600V-7.49h800V600z"
+            dur="6s"
+            begin="0s"
+            repeatCount="indefinite"
+        />
+    </svg>
+    <div class="milk">
+        <h1>Milk Record</h1>
+    </div>
+    <script>
+        // Smooth transition to the next page
         setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 3000);
+            document.body.style.animation = 'fadeOut 1s forwards';
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000);
+        }, 6000);
     </script>
 </body>
 </html>

@@ -157,7 +157,6 @@
     <table>
         <thead>
             <tr>
-             <!-- Empty header for Data 1 -->
                 <th>Completed Members</th>
                 <th>Total Members</th>
             </tr>
@@ -173,6 +172,9 @@
     <!-- Morning Data Button -->
     <div class="extra-button">
         <button id="morningDataButton">MORNING DATA</button>
+    </div>
+    <div class="extra-button">
+        <button id="morningDataViewButton">MORNING DATA VIEW</button>
     </div>
 
     <!-- Modal -->
@@ -259,7 +261,7 @@
                     const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // HH:MM AM/PM
         
                     // Realtime Database path: /milk/AM/
-                    const milkRef = ref(database, `milk/AM/${serialNumber}`);
+                    const milkRef = ref(database, `milk/AM/${todayDate}/${serialNumber}`);
                     await set(milkRef, {
                         serialNumber: serialNumber,
                         milkQuantity: milkQuantity,
@@ -297,6 +299,18 @@
             modal.style.display = "none"; // Close the modal
         }
 
+        // Function to get today's date in MM-DD-YYYY format
+        function getTodayDate() {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const year = today.getFullYear();
+            return `${month}-${day}-${year}`;
+        }
+
+        // Get today's date
+        const todayDate = getTodayDate();
+
         // Cancel button in the modal
         cancelButton.addEventListener('click', () => {
             modal.style.display = "none";
@@ -316,6 +330,10 @@
         // Back button event listener
         document.getElementById('morningDataButton').addEventListener('click', () => {
             window.location.href = 'morning_data.html';
+        });
+        // Back button event listener
+        document.getElementById('morningDataViewButton').addEventListener('click', () => {
+            window.location.href = 'morningview_data.html';
         });
     
         // Fetch user count and update the table

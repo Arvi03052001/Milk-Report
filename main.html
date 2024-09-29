@@ -235,18 +235,6 @@
             }
         }
 
-        function handleButtonClick(targetTimePeriod, redirectUrl) {
-            const currentPeriod = getCurrentTimePeriod();
-            if (currentPeriod !== targetTimePeriod) {
-                const continueAction = confirm(`Current time is ${currentPeriod}. Do you still want to continue?`);
-                if (!continueAction) {
-		    window.location.href = 'main.html';
-                    return;
-                }
-            }
-            window.location.href = redirectUrl;
-        }
-
         window.onload = () => {
             highlightButtonBasedOnTime();
 

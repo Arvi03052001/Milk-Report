@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evening Data View</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .date-box {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #ddd;
+            background-color: #fff;
+            font-size: 1.5em;
+            color: #333;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+        }
+
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .arrow-button {
+            padding: 1px 50px;
+            font-size: 2.5em;
+            border: none;
+            background: none;
+            cursor: pointer;
+            background-color: #007bff;
+            margin: 0 10px;
+        }
+
+        .arrow-button:focus {
+            outline: none;
+        }   
+    </style>
+</head>
+<body>
+
+    <h1>Evening Data View</h1>
+    
+
+    <!-- Date Box and Arrow Buttons -->
+    <div class="date-box" id="dateBox"></div>
+    <div class="button-container">
+        <button class="arrow-button" id="prevDate">&#9664;</button>
+        <button class="arrow-button" id="nextDate">&#9654;</button>
+    </div>
+
+    <!-- Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Summary</th>
+                <th>Quantity</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding: 20px;">5OI</td>
+                <td id="SOIQty" style="padding: 2px;">0</td>
+                <td id="SOIAmt" style="padding: 2px;">0</td>
+            </tr>
+            <!-- Other rows remain the same -->
+            <tr>
+                <td style="padding: 20px;">Members Milk</td>
+                <td id="memQty" style="padding: 2px;">0</td>
+                <td id="memAmt" style="padding: 2px;">0</td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">Non-Members Milk</td>
+                <td id="nonmemQty" style="padding: 2px;">0</td>
+                <td id="nonmemAmt" style="padding: 2px;">0</td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">Total Milk (L)</td>
+                <td id="totmilkQty" style="padding: 2px;">0</td>
+                <td id="totmilkAmt" style="padding: 2px;">0</td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">Village Milk (L)</td>
+                <td id="vilmilkQty" style="padding: 2px;">0</td>
+                <td id="vilmilkAmt" style="padding: 2px;">0</td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">Milk left (L)</td>
+                <td id="milkleftQty" style="padding: 2px;">0</td>
+                <td id="milkleftAmt" style="padding: 2px;">0</td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">Estimated More Milk (KG)</td>
+                <td id="EstmilkQty" style="padding: 2px;">0</td>
+                <td id="value14" style="padding: 2px;">0</td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">Total Qty Milk (Kg)</td>
+                <td id="totkgmilkQty" style="padding: 2px;">0</td>
+                <td id="value16" style="padding: 2px;">0</td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">More weight / Less weight</td>
+                <td id="value17" style="padding: 2px;">0</td>
+                <td id="value18" style="padding: 2px;">0</td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">CANE</td>
+                <td id="canQty" style="padding: 2px;">0</td>
+                <td id="cankg" style="padding: 2px;">0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Back Button -->
+    <div class="button-container">
+        <button onclick="window.history.back();">Back</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
+    
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQeWsANccZ7P13iVBsiie26bjmJV9Anng",
+            authDomain: "milk-2dd07.firebaseapp.com",
+            projectId: "milk-2dd07",
+            storageBucket: "milk-2dd07.appspot.com",
+            messagingSenderId: "1013506317972",
+            appId: "1:1013506317972:web:d0143c779469ac96be1e81",
+            measurementId: "G-TXB3TX5TP1"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const analytics = getAnalytics(app);
+
+        // JavaScript to set today's date in the date-box
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateBox = document.getElementById('dateBox');
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            dateBox.textContent = today.toLocaleDateString(undefined, options);
+        });
+
+        let currentDate = new Date();
+        const today = new Date();
+
+        function updateDateBox() {
+            const dateBox = document.getElementById('dateBox');
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            dateBox.textContent = currentDate.toLocaleDateString(undefined, options);
+            fetchData(); // Fetch data whenever the date is updated
+        }
+
+        // Function to format date as YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    
+        // Function to fetch data from Firebase
+        function fetchData() {
+            const formattedDate = formatDate(currentDate);
+            const dataRef = ref(database, `data/evening/${formattedDate}`);
+            get(dataRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    updateTable(data);
+                } else {
+                    console.log("No data available for this date.");
+                    updateTable({}); // Clear the table if no data
+                }
+            }).catch((error) => {
+                console.error("Error fetching data: ", error);
+            });
+        }
+
+        document.getElementById('prevDate').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            updateDateBox();
+        });
+    
+        document.getElementById('nextDate').addEventListener('click', () => {
+            if (currentDate < today) {
+                currentDate.setDate(currentDate.getDate() + 1);
+                updateDateBox();
+            }
+        });
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDateBox();
+        });
+    
+        // Function to update table with fetched data
+        function updateTable(data) {
+            document.getElementById('SOIQty').textContent = data.SOIQty || 0;
+            document.getElementById('SOIAmt').textContent = data.SOIAmt || 0;
+            document.getElementById('memQty').textContent = data.memQty || 0;
+            document.getElementById('memAmt').textContent = data.memAmt || 0;
+            document.getElementById('nonmemQty').textContent = data.nonmemQty || 0;
+            document.getElementById('nonmemAmt').textContent = data.nonmemAmt || 0;
+            document.getElementById('totmilkQty').textContent = data.totmilkQty || 0;
+            document.getElementById('totmilkAmt').textContent = data.totmilkAmt || 0;
+            document.getElementById('vilmilkQty').textContent = data.vilmilkQty || 0;
+            document.getElementById('vilmilkAmt').textContent = data.vilmilkAmt || 0;
+            document.getElementById('milkleftQty').textContent = data.milkleftQty || 0;
+            document.getElementById('milkleftAmt').textContent = data.milkleftAmt || 0;
+            document.getElementById('EstmilkQty').textContent = data.EstmilkQty || 0;
+            document.getElementById('value14').textContent = data.value14 || 0;
+            document.getElementById('totkgmilkQty').textContent = data.totkgmilkQty || 0;
+            document.getElementById('value16').textContent = data.value16 || 0;
+            document.getElementById('value17').textContent = data.value17 || 0;
+            document.getElementById('value18').textContent = data.value18 || 0;
+            document.getElementById('canQty').textContent = data.canQty || 0;
+            document.getElementById('cankg').textContent = data.cankg || 0;
+        }
+    
+        // Fetch data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchData);
+    </script>
+    
+
+</body>
+</html>
